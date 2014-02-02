@@ -108,8 +108,8 @@ public class ImageCollector extends JFrame {
         if(isRunning) {
         	if(!lookingForBall) {
         		// Writing to the info file, then writing storing the image
-        		fileManager.writeNegImage("images/nonball/image" + imageCount + ".jpg");
-        		Highgui.imwrite("images/nonball/negative_image" + imageCount + ".jpg", image);
+        		fileManager.writeNegImage("images/negative/image" + imageCount + ".jpg");
+        		Highgui.imwrite("images/negative/negative_image_" + imageCount + ".jpg", image);
         		imageCount++;
         		
                 try{
@@ -156,8 +156,8 @@ public class ImageCollector extends JFrame {
         			Core.rectangle(image, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 255, 100));
         			
         			// Writing to the info file, then writing storing the image
-            		fileManager.writePosImage("images/ball/image" + imageCount + ".jpg", 1, boundingRect);
-            		Highgui.imwrite("images/ball/positive_image" + imageCount + ".jpg", image);
+            		fileManager.writePosImage("images/positive/image" + imageCount + ".jpg", 1, boundingRect);
+            		Highgui.imwrite("images/positive/positive_image_" + imageCount + ".jpg", image);
             		imageCount++;
             		
             		try{

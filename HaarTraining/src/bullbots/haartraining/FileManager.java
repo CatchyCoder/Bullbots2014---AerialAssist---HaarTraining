@@ -12,8 +12,8 @@ public class FileManager {
 	
 	public FileManager() {
 		try {
-			negInfo = new File("images/nonballinfo.dat");
-			posInfo = new File("images/ballinfo.dat");
+			negInfo = new File("images/negative_info.dat");
+			posInfo = new File("images/positive_info.dat");
 			negFormatter = new Formatter(negInfo);
 			posFormatter = new Formatter(posInfo);
 		}
