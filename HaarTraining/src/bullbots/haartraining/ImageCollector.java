@@ -69,7 +69,7 @@ public class ImageCollector extends JFrame {
         vc = new VideoCapture(0);
         
         try {
-        	Thread.sleep(1100);
+        	Thread.sleep(1500);
         }
         catch(Exception e) {}
     }
