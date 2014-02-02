@@ -5,6 +5,9 @@
 	<classpathentry kind="src" path="images/nonball"/>
 	<classpathentry kind="src" path="images/ball"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="C:/OpenCV/opencv/build/java/opencv-248.jar"/>
+	<classpathentry kind="lib" path="Libraries/Network Table/networktables-desktop-javadoc.jar"/>
+	<classpathentry kind="lib" path="Libraries/Network Table/networktables-desktop-sources.jar"/>
+	<classpathentry kind="lib" path="Libraries/Network Table/networktables-desktop.jar"/>
+	<classpathentry kind="lib" path="Libraries/OpenCV x86/opencv-248.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
