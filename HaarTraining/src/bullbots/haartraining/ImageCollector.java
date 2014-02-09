@@ -23,10 +23,15 @@ import org.opencv.imgproc.Moments;
 
 public class ImageCollector extends JFrame {
 	
+	/*
+	 * TODO:
+	 * * Clean up the code
+	 * * Clean up the GUI
+	 */
+	
 	private static final long serialVersionUID = 1L;
 	
-	private final JLabel message = new JLabel("Loading Camera...");
-	private final JLabel img = new JLabel();
+	private final JLabel imgComp = new JLabel();
 	private final JLabel mode = new JLabel();
 	private final JLabel imgCount = new JLabel();
 	
@@ -66,10 +71,10 @@ public class ImageCollector extends JFrame {
         initFrame();
         
         // Getting access to the camera and turning it on
-        vc = new VideoCapture(0);
+        vc = new VideoCapture(1);
         
         try {
-        	Thread.sleep(1500);
+        	//Thread.sleep(1500);
         }
         catch(Exception e) {}
     }
@@ -85,15 +90,15 @@ public class ImageCollector extends JFrame {
 		setVisible(true);
 		addKeyListener(new InputHandler());
 		
-		img.setBounds(spacing, 0, xRes, yRes);
-		img.setVisible(true);
+		imgComp.setBounds(spacing, 0, xRes, yRes);
+		imgComp.setVisible(true);
 		imgCount.setBounds(0, 0, spacing, 100);
 		imgCount.setFont(new Font("Arial", Font.BOLD, 18));
 		imgCount.setVisible(true);
 		mode.setBounds(0, 100, spacing, 100);
 		mode.setFont(new Font("Arial", Font.BOLD, 18));
 		mode.setVisible(true);
-		add(img);
+		add(imgComp);
 		add(imgCount);
 		add(mode);
 	}
@@ -107,15 +112,12 @@ public class ImageCollector extends JFrame {
         
         if(isRunning) {
         	if(!lookingForBall) {
-        		// Writing to the info file, then writing storing the image
-        		fileManager.writeNegImage("images/negative/image" + imageCount + ".jpg");
-        		Highgui.imwrite("images/negative/negative_image_" + imageCount + ".jpg", image);
+        		// Writing to the info file, then storing the image
+        		fileManager.writeNegImagePath("negative/negative_image" + imageCount + ".jpg");
+        		Highgui.imwrite("images/negative/negative_image" + imageCount + ".jpg", image);
         		imageCount++;
         		
-                try{
-                	Thread.sleep(DELAY);
-                }
-                catch(Exception e){}
+                sleep(DELAY);
         	}
         	else {
         		// Apply a filter
@@ -145,37 +147,50 @@ public class ImageCollector extends JFrame {
         				break;
         			}
         		}
-        		if(found){
-        			Imgproc.drawContours(image, contours, i, new Scalar(0,255,0));
+        		if(found) {
+        			// Finding rect of circle
+        			Rect boundingRect = Imgproc.boundingRect(contours.get(i));
+        			
+        			// Writing to the info file, then storing the image
+            		fileManager.writePosImagePath("positive/positive_image" + imageCount + ".jpg", 1, boundingRect);
+            		Highgui.imwrite("images/positive/positive_image" + imageCount + ".jpg", image);
+            		
+            		// After the image is saved, it is drawn on
+            		// Drawing contours
+            		Imgproc.drawContours(image, contours, i, new Scalar(0,255,0));
         			Moments mu = Imgproc.moments(contours.get(i),false);
         			Point mc = new Point(mu.get_m10()/mu.get_m00(), mu.get_m01()/mu.get_m00());
         			Core.circle(image, mc, 4, new Scalar(0,255,0),-1,8,0);
-        			
-        			// Finding rect of circle
-        			Rect boundingRect = Imgproc.boundingRect(contours.get(i));
-        			Core.rectangle(image, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 255, 100));
-        			
-        			// Writing to the info file, then writing storing the image
-            		fileManager.writePosImage("images/positive/image" + imageCount + ".jpg", 1, boundingRect);
-            		Highgui.imwrite("images/positive/positive_image_" + imageCount + ".jpg", image);
-            		imageCount++;
             		
-            		try{
-                    	Thread.sleep(DELAY);
-                    }
-                    catch(Exception e){}
+        			// Drawing a rectangle
+        			Core.rectangle(image, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 255, 100));
+            		
+        			// Writing another image of the positive image that was drawn on
+        			Highgui.imwrite("images/positive_view/img" + imageCount + ".jpg", image);
+        			
+            		imageCount++;
+            		sleep(DELAY);
         		}
         	}
         	
         }
     }
+    
+    private void sleep(long sleepTime) {
+    	try {
+    		Thread.sleep(sleepTime);
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    }
 	
 	public void updateGUI() {
-		img.setIcon(new ImageIcon(convMatToBuff(image)));
+		imgComp.setIcon(new ImageIcon(convMatToBuff(image)));
 		imgCount.setText("Images Taken: " + imageCount);
 		mode.setText("Looking for ball: " + lookingForBall);
 		repaint();
-		img.repaint();
+		imgComp.repaint();
 		imgCount.repaint();
 	}
 	

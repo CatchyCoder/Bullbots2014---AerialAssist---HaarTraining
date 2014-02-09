@@ -22,9 +22,9 @@ public class FileManager {
 		}
 	}
 	
-	public void writeNegImage(String path) {
+	public void writeNegImagePath(String path) {
 		try {
-			negFormatter.format("%s\n", path);
+			negFormatter.format("%s" + System.lineSeparator(), path);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -32,9 +32,9 @@ public class FileManager {
 		}
 	}
 	
-	public void writePosImage(String path, int objects, Rect rect) {
+	public void writePosImagePath(String path, int objects, Rect rect) {
 		try {
-			posFormatter.format("%s %s %s %s %s %s\n", path, objects, rect.x, rect.y, rect.width, rect.height);
+			posFormatter.format("%s %s %s %s %s %s" + System.lineSeparator(), path, objects, rect.x, rect.y, rect.width, rect.height);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
