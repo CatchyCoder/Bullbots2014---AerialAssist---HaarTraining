@@ -1,12 +1,7 @@
-package bullbots.haartraining;
+package org.bullbots.haartraining;
 
-import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -17,100 +12,34 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
-import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
-public class ImageCollector extends JFrame {
+public class ImageProcessor {
+
+	public static Camera camera;
 	
-	/*
-	 * TODO:
-	 * * Clean up the code
-	 * * Clean up the GUI
-	 */
+	private Mat image, dirtyImage;
 	
-	private static final long serialVersionUID = 1L;
-	
-	private final JLabel imgComp = new JLabel();
-	private final JLabel mode = new JLabel();
-	private final JLabel imgCount = new JLabel();
-	
-	public static FileManager fileManager = new FileManager();
-	
-	private Mat image, image2, image3;
-	private VideoCapture vc;
-	
-	private int imageCount = 0;
-	private final int DELAY = 250;
-	
-	int xRes = 640;
-    int yRes = 480;
-	
-	public static boolean isRunning = false;
-	public static boolean lookingForBall = false;
-    
-    public ImageCollector() {
-    	initialize();
-    	
-        while(true) {
-        	processImage();
-        	updateGUI();
-        }
-    }
-    
-    public void initialize() {
-    	// Loading the library
-        System.out.println("Welcome to OpenCV " + Core.VERSION);
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        
-        // Creating the image and settings it size (Image is blank)
-    	image = new Mat(yRes,xRes,CvType.CV_8SC1);
-    	image2 = new Mat(yRes,xRes,CvType.CV_8SC1);
-    	image3 = new Mat(yRes,xRes,CvType.CV_8SC1);
-        
-        initFrame();
-        
-        // Getting access to the camera and turning it on
-        vc = new VideoCapture(1);
-        
-        try {
-        	//Thread.sleep(1500);
-        }
-        catch(Exception e) {}
-    }
-    
-    private void initFrame() {
-    	int spacing = 200;
-		setSize(xRes + spacing, yRes);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLocationRelativeTo(null);
-		setUndecorated(true);
-		setLayout(null);
-		setResizable(false);
-		setVisible(true);
-		addKeyListener(new InputHandler());
+	public ImageProcessor() {
+		// Loading OpenCV library
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		imgComp.setBounds(spacing, 0, xRes, yRes);
-		imgComp.setVisible(true);
-		imgCount.setBounds(0, 0, spacing, 100);
-		imgCount.setFont(new Font("Arial", Font.BOLD, 18));
-		imgCount.setVisible(true);
-		mode.setBounds(0, 100, spacing, 100);
-		mode.setFont(new Font("Arial", Font.BOLD, 18));
-		mode.setVisible(true);
-		add(imgComp);
-		add(imgCount);
-		add(mode);
+		camera = new Camera(1);
+		
+		image = new Mat(480, 640, CvType.CV_8SC1);
+		dirtyImage = new Mat(480, 640, CvType.CV_8SC1);
 	}
-    
-    private void processImage() {
+	
+	private void processImage() {
         // Takes a picture
-        vc.read(image);
+        camera.read(image);
+        //dirtyImage = image;
         
         //System.out.print("X: "+vc.get(Highgui.CV_CAP_PROP_FRAME_WIDTH ));
         //System.out.println("\tY: "+vc.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT ));
         
-        if(isRunning) {
+        /*if(isRunning) {
         	if(!lookingForBall) {
         		// Writing to the info file, then storing the image
         		fileManager.writeNegImagePath("negative/negative_image" + imageCount + ".jpg");
@@ -173,28 +102,10 @@ public class ImageCollector extends JFrame {
         		}
         	}
         	
-        }
-    }
-    
-    private void sleep(long sleepTime) {
-    	try {
-    		Thread.sleep(sleepTime);
-    	}
-    	catch(Exception e) {
-    		e.printStackTrace();
-    	}
+        }*/
     }
 	
-	public void updateGUI() {
-		imgComp.setIcon(new ImageIcon(convMatToBuff(image)));
-		imgCount.setText("Images Taken: " + imageCount);
-		mode.setText("Looking for ball: " + lookingForBall);
-		repaint();
-		imgComp.repaint();
-		imgCount.repaint();
-	}
-	
-	public BufferedImage convMatToBuff(Mat mat) {
+	public BufferedImage convMat2Buff(Mat mat) {
 		// Code for converting Mat to BufferedImage
 		int type = BufferedImage.TYPE_BYTE_GRAY;
 		if(mat.channels() > 1) {
@@ -208,5 +119,15 @@ public class ImageCollector extends JFrame {
 		BufferedImage bImage = new BufferedImage(mat.cols(), mat.rows(), type);
 		bImage.getRaster().setDataElements(0, 0, mat.cols(), mat.rows(), b);
 		return bImage;
+	}
+	
+	public BufferedImage getCleanImage() {
+		processImage();
+		return convMat2Buff(image);
+	}
+	
+	public BufferedImage getDirtyImage() {
+		processImage();
+		return convMat2Buff(dirtyImage);
 	}
 }

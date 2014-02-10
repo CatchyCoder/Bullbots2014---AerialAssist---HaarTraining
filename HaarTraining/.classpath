@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="Libraries/Network Table/networktables-desktop-sources.jar"/>
 	<classpathentry kind="lib" path="Libraries/Network Table/networktables-desktop.jar"/>
 	<classpathentry kind="lib" path="Libraries/OpenCV/opencv-248.jar"/>
+	<classpathentry kind="lib" path="UserInterface.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
