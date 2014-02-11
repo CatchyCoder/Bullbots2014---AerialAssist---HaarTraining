@@ -7,8 +7,8 @@ import userinterface.window.Window;
 import org.opencv.core.Core;
 
 public class HaarTraining {
-
-	public static Window window = new Window(640, 480);
+	
+	public static Window window = new Window(800, 480);
 	
 	
 	

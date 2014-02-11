@@ -21,12 +21,14 @@ public class ImageProcessor {
 	
 	private Mat image, dirtyImage;
 	
-	public ImageProcessor() {
+	public ImageProcessor(int index) {
 		// Loading OpenCV library
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		camera = new Camera(1);
+		// Loading camera
+		camera = new Camera(index);
 		
+		// Preparing images
 		image = new Mat(480, 640, CvType.CV_8SC1);
 		dirtyImage = new Mat(480, 640, CvType.CV_8SC1);
 	}
@@ -35,9 +37,6 @@ public class ImageProcessor {
         // Takes a picture
         camera.read(image);
         //dirtyImage = image;
-        
-        //System.out.print("X: "+vc.get(Highgui.CV_CAP_PROP_FRAME_WIDTH ));
-        //System.out.println("\tY: "+vc.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT ));
         
         /*if(isRunning) {
         	if(!lookingForBall) {
