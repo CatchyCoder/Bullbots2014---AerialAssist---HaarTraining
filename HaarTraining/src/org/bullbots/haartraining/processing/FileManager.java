@@ -1,4 +1,4 @@
-package org.bullbots.haartraining;
+package org.bullbots.haartraining.processing;
 
 import java.io.File;
 import java.util.Formatter;
