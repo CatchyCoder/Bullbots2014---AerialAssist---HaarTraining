@@ -2,6 +2,7 @@ package org.bullbots.haartraining.page;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -13,6 +14,7 @@ import org.bullbots.haartraining.processing.ImageProcessor;
 import userinterface.item.ButtonItem;
 import userinterface.item.GraphicalItem;
 import userinterface.item.InteractiveItem;
+import userinterface.item.StateButtonItem;
 import userinterface.item.TextItem;
 import userinterface.page.Page;
 import userinterface.window.Window;
@@ -22,18 +24,20 @@ public class MainPage extends Page implements Runnable {
 	private ImageProcessor processor = new ImageProcessor(this, 0);
 	
 	private ButtonItem exit = new ButtonItem(this, 0, 0, "Exit", new Font("Arial", Font.PLAIN, 24), Color.WHITE, Color.RED);
-	private GraphicalItem image = new GraphicalItem(this, 0, 0); // position is not set in constructor
-	private ButtonItem switchMode = new ButtonItem(this, 0, 50, "Switch", new Font("Arial", Font.PLAIN, 24), Color.WHITE, Color.ORANGE);
+	private TextItem image = new TextItem(this, 0, 0, "", new Font("", 0, 0), Color.WHITE);
 	
-	private TextItem negCount = new TextItem(this, 0, 100, "Negative Images: 0", new Font("Arial", Font.PLAIN, 24));
-	private TextItem posCount = new TextItem(this, 0, 150, "Positive Images: 0", new Font("Arial", Font.PLAIN, 24));
+	private String[] paths = {"positive.png", "negative.png"};
+	private String[] hoverPaths = {"switch.png", "switch.png"};
+	private StateButtonItem switchMode = new StateButtonItem(this, 0, 50, paths, hoverPaths);
 	
-	private boolean positiveSearch = true;
+	private TextItem negCount = new TextItem(this, 0, 100, "Negative Images: 0", new Font("Arial", Font.PLAIN, 24), Color.WHITE);
+	private TextItem posCount = new TextItem(this, 0, 150, "Positive Images: 0", new Font("Arial", Font.PLAIN, 24), Color.WHITE);
+	
 	private boolean isRunning = false;
 	private boolean collectingData = false;
 	
-	public MainPage(Window window, int x, int y, int width, int height, String resourcePath) {
-		super(window, x, y, width, height, resourcePath);
+	public MainPage(Window window, int x, int y, int width, int height) {
+		super(window, x, y, width, height, "/mainpage/");
 		this.setBackground(Color.DARK_GRAY);
 		
 		BufferedImage img =  processor.getRawImage();
@@ -52,7 +56,11 @@ public class MainPage extends Page implements Runnable {
 			isRunning = false;
 			System.exit(0);
 		}
-		else if(item.equals(switchMode)) positiveSearch = !positiveSearch;
+	}
+	
+	@Override
+	public void handleKeyPress(KeyEvent event) {
+		if(event.getKeyCode() == KeyEvent.VK_SPACE) collectingData = !collectingData; 
 	}
 	
 	@Override
@@ -60,20 +68,17 @@ public class MainPage extends Page implements Runnable {
 		while(isRunning) {
 			// Constantly updating camera feed
 			JLabel imageComponent = ((JLabel) image.getComponent());
-			if(positiveSearch) imageComponent.setIcon(new ImageIcon(processor.getProcessedImage()));
-			else imageComponent.setIcon(new ImageIcon(processor.getDrawnImage()));
+			if(isPositiveSearch()) imageComponent.setIcon(new ImageIcon(processor.getProcessedImage()));
+			else imageComponent.setIcon(new ImageIcon(processor.getRawImage()));
 			
-			negCount.getComponent().setText("Negative Images: " + processor.getNegCount());
-			posCount.getComponent().setText("Positive Images: " + processor.getPosCount());
-			
-			// Updating the size of the components
-			negCount.setSizeAndLoc(negCount.getComponent());
-			posCount.setSizeAndLoc(posCount.getComponent());
+			// Updating values
+			negCount.setText("Negative Images: " + processor.getNegCount());
+			posCount.setText("Positive Images: " + processor.getPosCount());
 		}
 	}
 	
 	public boolean isPositiveSearch() {
-		return positiveSearch;
+		return switchMode.getState() ==  0;
 	}
 	
 	public boolean isCollectingData() {

@@ -11,7 +11,7 @@ public class Camera {
 		VC = new VideoCapture(index);
 		Runtime.getRuntime().addShutdownHook(new Shutdownhook());
 		
-		// Giving a small amount of time to initailize the camera
+		// Giving a small amount of time to initialize the camera
 		try {
 			Thread.sleep(250);
 		}
