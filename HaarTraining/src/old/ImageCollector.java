@@ -36,7 +36,7 @@ public class ImageCollector extends JFrame {
 	private final JLabel mode = new JLabel();
 	private final JLabel imgCount = new JLabel();
 	
-	public static FileManager fileManager = new FileManager();
+	public static FileManagerOld fileManager = new FileManagerOld();
 	
 	private Mat image, image2, image3;
 	private Camera camera;

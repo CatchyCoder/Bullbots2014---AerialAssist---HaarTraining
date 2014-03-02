@@ -20,7 +20,7 @@ import org.opencv.imgproc.Moments;
 public class ImageProcessor {
 
 	public static Camera camera;
-	private Mat image, image2;
+	private Mat rawImage, processedImage, graphicImage;
 	private MainPage mainPage;
 	private FileManager fileManager = new FileManager();
 	
@@ -35,8 +35,9 @@ public class ImageProcessor {
 		camera = new Camera(index);
 		
 		// Preparing images
-		image = new Mat(480, 640, CvType.CV_8SC1);
-		image2 = new Mat(480, 640, CvType.CV_8SC1);
+		rawImage = new Mat(480, 640, CvType.CV_8SC1);
+		processedImage = new Mat(480, 640, CvType.CV_8SC1);
+		graphicImage = new Mat(480, 640, CvType.CV_8SC1);
 		
 		this.mainPage = mainPage;
 	}
@@ -52,32 +53,48 @@ public class ImageProcessor {
         else processNegative();
         */
     }
+	
+	public void capturePosImage() {
+		System.out.println("capturePosImage()");
+		
+		// Saving the raw image to the 'positive' folder
+		Highgui.imwrite("images/positive/positive_image_" + posCount + ".jpg", rawImage);
+		posCount++;
+	}
+	
+	public void captureNegImage() {
+		System.out.println("captureNegImage()");
+		
+		// Saving the raw image to the 'negative' folder
+		Highgui.imwrite("images/negative/negative_image_" + negCount + ".jpg", rawImage);
+		negCount++;
+	}
 		
 	private void processOld() {
 		// Takes a picture
-        camera.read(image);
+        camera.read(rawImage);
         
-    	if(!mainPage.isPositiveSearch()) {
+    	if(false) {
     		// Writing to info file HERE
     		
             sleep(DELAY);
     	}
     	else {
     		// applies a blur
-            Imgproc.GaussianBlur(image, image2, new Size(7, 7), 1.1, 1.1);
+            Imgproc.GaussianBlur(rawImage, processedImage, new Size(7, 7), 1.1, 1.1);
             
             // Converts the color
-            Imgproc.cvtColor(image2, image2, Imgproc.COLOR_BGR2HSV_FULL);
+            Imgproc.cvtColor(processedImage, processedImage, Imgproc.COLOR_BGR2HSV_FULL);
             
             // Filters the image to look for red
             int rotation = 128 - 255; // = (127) -- Hue
-            Core.add(image2, new Scalar(rotation, 0, 0), image2);
-            Core.inRange(image2, new Scalar(114, 114, 114), new Scalar(142, 255, 255), image2);
+            Core.add(processedImage, new Scalar(rotation, 0, 0), processedImage);
+            Core.inRange(processedImage, new Scalar(114, 114, 114), new Scalar(142, 255, 255), processedImage);
             
             // Finding contours
             ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
             Mat hierarchy=new Mat();
-    		Imgproc.findContours(image2, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
+    		Imgproc.findContours(processedImage, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
     		
     		boolean found = false;
     		int i;
@@ -96,15 +113,15 @@ public class ImageProcessor {
         		// After the image is saved, it is drawn on below....
     			
         		// Drawing contours
-        		Imgproc.drawContours(image, contours, i, new Scalar(255, 0,0));
+        		Imgproc.drawContours(graphicImage, contours, i, new Scalar(255, 0,0));
     			Moments mu = Imgproc.moments(contours.get(i),false);
     			Point mc = new Point(mu.get_m10()/mu.get_m00(), mu.get_m01()/mu.get_m00());
     			
     			// Drawing circle in the center of the object detected
-    			Core.circle(image, mc, 4, new Scalar(255, 0, 0),-1,8,0);
+    			Core.circle(graphicImage, mc, 4, new Scalar(255, 0, 0),-1,8,0);
         		
     			// Drawing a rectangle
-    			Core.rectangle(image, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 0, 0));
+    			Core.rectangle(graphicImage, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 0, 0));
         		
     			// Wrote OTHER image HERE
     			
@@ -117,12 +134,12 @@ public class ImageProcessor {
 		System.out.println("Processing positive");
 		// Looking for the object...
 		
-		image = applyFiltering(image);
+		rawImage = applyFiltering(rawImage);
         
         // Finding contours
         ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         Mat hierarchy=new Mat();
-		Imgproc.findContours(image, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
+		Imgproc.findContours(rawImage, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
 		
 		contours = getAreasLargerThan(contours, 300);
 		
@@ -136,22 +153,22 @@ public class ImageProcessor {
 			// Writing to the info file, then storing the image
     		if(mainPage.isCollectingData()) {
     			fileManager.writePosImagePath("positive/positive_image" + posCount + ".jpg", 1, boundingRect);
-    			Highgui.imwrite("images/positive/positive_image" + posCount + ".jpg", image);
+    			Highgui.imwrite("images/positive/positive_image" + posCount + ".jpg", rawImage);
     		}
     		
     		// After the image is saved, it is drawn on
     		// Drawing contours
-    		Imgproc.drawContours(image2, contours, contours.indexOf(object), new Scalar(120, 0, 0));
+    		Imgproc.drawContours(processedImage, contours, contours.indexOf(object), new Scalar(120, 0, 0));
 			Moments mu = Imgproc.moments(object ,false);
 			Point mc = new Point(mu.get_m10()/mu.get_m00(), mu.get_m01()/mu.get_m00());
-			Core.circle(image2, mc, 4, new Scalar(120, 0, 0),-1,8,0);
+			Core.circle(processedImage, mc, 4, new Scalar(120, 0, 0),-1,8,0);
     		
 			// Drawing a rectangle
-			Core.rectangle(image2, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 255, 100));
+			Core.rectangle(processedImage, new Point(boundingRect.x, boundingRect.y), new Point(boundingRect.x + boundingRect.width, boundingRect.y + boundingRect.height), new Scalar(255, 255, 100));
     		
 			if(mainPage.isCollectingData()) {
 				// Writing another image of the positive image that was drawn on
-    			Highgui.imwrite("images/positive_view/img" + posCount + ".jpg", image);
+    			Highgui.imwrite("images/positive_view/img" + posCount + ".jpg", rawImage);
     			
     			posCount++;
         		sleep(DELAY);
@@ -165,7 +182,7 @@ public class ImageProcessor {
 		
 		// Writing to the data file, then storing the image in a folder
 		fileManager.writeNegImagePath("negative/negative_image" + negCount + ".jpg");
-		Highgui.imwrite("images/negative/negative_image" + negCount + ".jpg", image);
+		Highgui.imwrite("images/negative/negative_image" + negCount + ".jpg", rawImage);
 		negCount++;
 		
         sleep(DELAY);
@@ -236,18 +253,18 @@ public class ImageProcessor {
 	}
 	
 	public BufferedImage getRawImage() {
-		camera.read(image);
-		return convMat2Buff(image);
+		camera.read(rawImage);
+		return convMat2Buff(rawImage);
 	}
 	
 	public BufferedImage getProcessedImage() {
 		processImage();
-		return convMat2Buff(image);
+		return convMat2Buff(processedImage);
 	}
 	
-	public BufferedImage getDrawnImage() {
+	public BufferedImage getGraphicImage() {
 		processImage();
-		return convMat2Buff(image2);
+		return convMat2Buff(graphicImage);
 	}
 	
 	public int getNegCount() {

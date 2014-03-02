@@ -5,12 +5,12 @@ import java.util.Formatter;
 
 import org.opencv.core.Rect;
 
-public class FileManager {
+public class FileManagerOld {
 
 	private File negInfo, posInfo;
 	private Formatter negFormatter, posFormatter;
 	
-	public FileManager() {
+	public FileManagerOld() {
 		try {
 			negInfo = new File("images/negative_info.dat");
 			posInfo = new File("images/positive_info.dat");

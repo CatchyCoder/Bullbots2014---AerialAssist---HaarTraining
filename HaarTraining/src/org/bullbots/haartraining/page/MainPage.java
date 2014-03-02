@@ -12,7 +12,6 @@ import org.bullbots.haartraining.HaarTraining;
 import org.bullbots.haartraining.processing.ImageProcessor;
 
 import userinterface.item.ButtonItem;
-import userinterface.item.GraphicalItem;
 import userinterface.item.InteractiveItem;
 import userinterface.item.StateButtonItem;
 import userinterface.item.TextItem;
