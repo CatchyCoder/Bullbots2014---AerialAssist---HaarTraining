@@ -13,6 +13,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -21,6 +22,7 @@ import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+import org.opencv.objdetect.CascadeClassifier;
 
 public class ImageCollector extends JFrame {
 	
@@ -54,7 +56,8 @@ public class ImageCollector extends JFrame {
     	initialize();
     	
         while(true) {
-        	processImage();
+        	//processImage();
+        	stuff();
         	updateGUI();
         }
     }
@@ -64,7 +67,7 @@ public class ImageCollector extends JFrame {
         System.out.println("Welcome to OpenCV " + Core.VERSION);
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         
-        camera = new Camera(1);
+        camera = new Camera(0);
         
         // Creating the image and settings it size (Image is blank)
     	image = new Mat(yRes,xRes,CvType.CV_8SC1);
@@ -97,6 +100,29 @@ public class ImageCollector extends JFrame {
 		add(imgCount);
 		add(mode);
 	}
+    
+    private void stuff() {
+	    CascadeClassifier faceDetector = new CascadeClassifier("final.xml");
+	    //faceDetector.load("testthing.xml");
+	    System.out.println(faceDetector.empty());
+	    camera.read(image);
+
+	    // Detect faces in the image.
+	    // MatOfRect is a special container class for Rect.
+	    MatOfRect faceDetections = new MatOfRect();
+	    faceDetector.detectMultiScale(image, faceDetections);
+
+	    System.out.println(String.format("Detected %s things", faceDetections.toArray().length));
+
+	    // Draw a bounding box around each face.
+	    for (Rect rect : faceDetections.toArray()) {
+	        Core.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+	    }
+
+	    // Save the visualized detection.
+	    String filename = "testpic.png";
+	    Highgui.imwrite(filename, image);
+    }
     
     private void processImage() {
         // Takes a picture

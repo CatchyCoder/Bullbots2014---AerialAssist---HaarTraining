@@ -27,6 +27,9 @@ public class ImageProcessor {
 	private int posCount = 0, negCount = 0;
 	private final long DELAY = 200;
 	
+	private ArrayList<Mat> posImages = new ArrayList<Mat>();
+	private ArrayList<Mat> negImages = new ArrayList<Mat>();
+	
 	public ImageProcessor(MainPage mainPage, int index) {
 		// Loading OpenCV library
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -54,20 +57,17 @@ public class ImageProcessor {
         */
     }
 	
-	public void capturePosImage() {
-		System.out.println("capturePosImage()");
-		
-		// Saving the raw image to the 'positive' folder
-		Highgui.imwrite("images/positive/positive_image_" + posCount + ".jpg", rawImage);
-		posCount++;
+	public void printStuff() {
+		System.out.println("size = " + posImages.size());
+		for(Mat mat : posImages) Highgui.imwrite("images/positive/" + posImages.indexOf(mat) + ".jpg", mat);
+	}
+	
+	public void capturePosImage() {		
+		posImages.add(rawImage.clone());
 	}
 	
 	public void captureNegImage() {
-		System.out.println("captureNegImage()");
-		
-		// Saving the raw image to the 'negative' folder
-		Highgui.imwrite("images/negative/negative_image_" + negCount + ".jpg", rawImage);
-		negCount++;
+		negImages.add(rawImage.clone());
 	}
 		
 	private void processOld() {
@@ -152,7 +152,7 @@ public class ImageProcessor {
 			
 			// Writing to the info file, then storing the image
     		if(mainPage.isCollectingData()) {
-    			fileManager.writePosImagePath("positive/positive_image" + posCount + ".jpg", 1, boundingRect);
+    			fileManager.writePosImagePath("positive/positive_image" + posCount + ".jpg", boundingRect);
     			Highgui.imwrite("images/positive/positive_image" + posCount + ".jpg", rawImage);
     		}
     		
@@ -227,7 +227,7 @@ public class ImageProcessor {
 		return object;
 	}
 	
-	private BufferedImage convMat2Buff(Mat mat) {
+	public BufferedImage convMat2Buff(Mat mat) {
 		// Code for converting Mat to BufferedImage
 		int type = BufferedImage.TYPE_BYTE_GRAY;
 		if(mat.channels() > 1) {
@@ -267,11 +267,11 @@ public class ImageProcessor {
 		return convMat2Buff(graphicImage);
 	}
 	
-	public int getNegCount() {
-		return negCount;
+	public ArrayList<Mat> getPosImages() {
+		return posImages;
 	}
 	
-	public int getPosCount() {
-		return posCount;
+	public ArrayList<Mat> getNegImages() {
+		return negImages;
 	}
 }

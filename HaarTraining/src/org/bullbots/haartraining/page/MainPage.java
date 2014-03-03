@@ -71,8 +71,8 @@ public class MainPage extends Page implements Runnable {
 			else imageComponent.setIcon(new ImageIcon(processor.getRawImage()));
 			
 			// Updating values
-			negCount.setText("Negative Images: " + processor.getNegCount());
-			posCount.setText("Positive Images: " + processor.getPosCount());
+			negCount.setText("Negative Images: " + processor.getNegImages().size());
+			posCount.setText("Positive Images: " + processor.getPosImages().size());
 		}
 	}
 	

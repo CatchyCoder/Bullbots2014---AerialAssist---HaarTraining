@@ -2,14 +2,23 @@ package org.bullbots.haartraining.page;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
+import org.bullbots.haartraining.Core;
 import org.bullbots.haartraining.HaarTraining;
+import org.bullbots.haartraining.item.ImageItem;
 import org.bullbots.haartraining.processing.ImageProcessor;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
+import org.opencv.objdetect.CascadeClassifier;
 
 import userinterface.item.ButtonItem;
 import userinterface.item.InteractiveItem;
@@ -26,11 +35,19 @@ public class NewMainPage extends Page implements Runnable {
 	
 	private ButtonItem exit = new ButtonItem(this, 0, 0, "Exit", new Font(HaarTraining.FONT_STYLE, Font.BOLD, 32), Color.WHITE, Color.RED);
 	private ImageProcessor processor = new ImageProcessor(null, 0);
-	private TextItem image = new TextItem(this, 200, 0, "", new Font("", 0, 0), Color.WHITE);
+	private ImageItem image = new ImageItem(this, 200, 0);
 	private ButtonItem captureImage = new ButtonItem(this, 0, 100, "Take Picture\n(Or Press <enter>)", new Font(HaarTraining.FONT_STYLE, Font.BOLD, 20), Color.WHITE, Color.GREEN);
 	private ButtonItem finish = new ButtonItem(this, 0, 300, "Finish and Refine", new Font(HaarTraining.FONT_STYLE, Font.BOLD, 20), Color.WHITE, Color.ORANGE);
+	private TextItem posCount = new TextItem(this, 0, 150, "Positive Images: 0", new Font(HaarTraining.FONT_STYLE, Font.BOLD, 20), Color.WHITE);
+	private TextItem negCount = new TextItem(this, 0, 200, "Negative Images: 0", new Font(HaarTraining.FONT_STYLE, Font.BOLD, 20), Color.WHITE);
 	
 	private boolean isRunning = false;
+	
+	
+	CascadeClassifier c = new CascadeClassifier("testthing.xml");
+	
+	
+	
 	
 	public NewMainPage(Window window, int x, int y, int width, int height) {
 		super(window, x, y, width, height, "/mainpage/");
@@ -47,7 +64,10 @@ public class NewMainPage extends Page implements Runnable {
 			System.exit(0);
 		}
 		else if(item.equals(captureImage)) takePicture();
-		else if(item.equals(finish)) HaarTraining.window.setPage(new RefinePage(HaarTraining.window, 0, 0, this.getWidth(), this.getHeight()));
+		else if(item.equals(finish)) {
+			processor.printStuff();
+			HaarTraining.window.setPage(new RefinePage(HaarTraining.window, 0, 0, this.getWidth(), this.getHeight(), processor));
+		}
 	}
 	
 	@Override
@@ -65,7 +85,6 @@ public class NewMainPage extends Page implements Runnable {
 
 	@Override
 	public void run() {
-		
 		// Resizing the image component
 		BufferedImage img = processor.getRawImage();
 		image.getComponent().setBounds(HaarTraining.window.getSize().width - img.getWidth(), 0, img.getWidth(), img.getHeight());
@@ -75,8 +94,8 @@ public class NewMainPage extends Page implements Runnable {
 			JLabel imageComponent = ((JLabel) image.getComponent());
 			imageComponent.setIcon(new ImageIcon(processor.getRawImage()));
 			
-			image.getComponent().repaint();
-			this.repaint();
+			posCount.setText("Positive Images: " + processor.getPosImages().size());
+			negCount.setText("Negative Images: " + processor.getNegImages().size());
 		}
 	}
 }

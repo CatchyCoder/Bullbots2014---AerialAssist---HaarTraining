@@ -6,31 +6,36 @@ import java.util.Formatter;
 import org.opencv.core.Rect;
 
 public class FileManager {
-
+	
 	private File negInfo, posInfo;
 	private Formatter negFormatter, posFormatter;
 	
-	private final String RES_FOLDER_PATH = "C:/HaarTraining";
+	public static final String RES_FOLDER_PATH = "C:/HaarTraining";
 	
 	public FileManager() {
+		createResFolders();
+		
+		
 		try {
-			negInfo = new File("images/negative_info.dat");
-			posInfo = new File("images/positive_info.dat");
+			negInfo = new File(RES_FOLDER_PATH + "/negative_info.dat");
+			posInfo = new File(RES_FOLDER_PATH + "/positive_info.dat");
 			negFormatter = new Formatter(negInfo);
 			posFormatter = new Formatter(posInfo);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 	
 	public void createResFolders() {
-		boolean created = new File(RES_FOLDER_PATH + "/images/positive").mkdirs();
-		boolean created2 = new File(RES_FOLDER_PATH + "/images/negative").mkdirs();
-		if(!created || !created2) { // Failed to create directory and/or parent directories
-			System.err.println("ERROR: Failed to create resource folder(s).");
-		}
-		else System.out.println("Created Folders");
+		File path1 = new File(RES_FOLDER_PATH + "/images/positive");
+		File path2 = new File(RES_FOLDER_PATH + "/images/negative");
+		
+		// If the path does not exist, and it could not be created, display an error message
+		if(!path1.exists() && !path1.mkdirs()) System.out.println("ERROR: Could not make \"" + path1.getPath() + "\"");
+		if(!path2.exists() && !path2.mkdirs()) System.out.println("ERROR: Could not make \"" + path2.getPath() + "\"");
 	}
 	
 	public void writeNegImagePath(String path) {
@@ -43,9 +48,9 @@ public class FileManager {
 		}
 	}
 	
-	public void writePosImagePath(String path, int objects, Rect rect) {
+	public void writePosImagePath(String path, Rect rect) {
 		try {
-			posFormatter.format("%s %s %s %s %s %s" + System.lineSeparator(), path, objects, rect.x, rect.y, rect.width, rect.height);
+			posFormatter.format("%s %s %s %s %s %s" + System.lineSeparator(), path, 1, rect.x, rect.y, rect.width, rect.height);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
